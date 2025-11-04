@@ -1,0 +1,64 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(to right, #00164d, #2a0046);
+    color: #fff;
+    text-align: center;
+}
+
+h1 {
+    font-size: 3rem;
+    margin-bottom: 2rem;
+    font-weight: bold;
+    background: linear-gradient(90deg, #ffbf00, #e3d800);
+    /* your gradient */
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    /* for other browsers, optional */
+    color: transparent;
+    /* fallback */
+}
+
+h2 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+.shine {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.513), inset 3px 3px 5px rgba(255, 255, 255, 0.396), inset -8px -8px 16px rgba(255, 255, 255, 0.171);
+}
+
+button {
+    background: linear-gradient(90deg, #e19200, #fff200);
+    color: #ffffff;
+    font-weight: bold;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    transform: scale(1.05);
+}
+
+input {
+    background: linear-gradient(90deg, #eefffb, #ffffff);
+    color: #000000;
+    font-weight: bold;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+.small {
+    background: linear-gradient(90deg, #00d5ff, #315aff);
+    font-size: 0.8rem;
+    padding: 6px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+}

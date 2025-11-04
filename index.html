@@ -5,10 +5,109 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Money Tracker</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-    <script src="script.js"></script>
+
+    <h1>Money Tracker</h1>
+
+    <h2>Add Chore</h2>
+    <form id="chore-form">
+        <label>Chore Name:</label>
+        <input type="text" id="chore-name" required>
+        <br><br>
+
+        <label>Amount:</label>
+        <input type="number" id="chore-amount" step="0.01" required>
+        <br><br>
+
+        <button type="submit" class="shine">Add Chore</button>
+    </form>
+
+
+    <h2>Total Earned: $<span id="total">0.00</span></h2>
+
+
+    <h2>Chore Log</h2>
+    <div id="chore-list"></div>
+
+    <script type="module">
+        // Import from CDN
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js';
+        import { getDatabase, ref, push, set, onValue, remove } from 'https://www.gstatic.com/firebasejs/12.5.0/firebase-database.js';
+
+        // Your config
+        const firebaseConfig = {
+            apiKey: "AIzaSyBhC4HkaSdxLTnHlwWBFnAiSlmFcnu3W1Q",
+            authDomain: "moneytracker-06.firebaseapp.com",
+            projectId: "moneytracker-06",
+            storageBucket: "moneytracker-06.firebasestorage.app",
+            messagingSenderId: "392680617497",
+            appId: "1:392680617497:web:946dec8d2839ec3ccedc88",
+            databaseURL: "https://moneytracker-06-default-rtdb.firebaseio.com"
+        };
+
+        // Initialize
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // Get elements
+        const form = document.getElementById('chore-form');
+        const choreList = document.getElementById('chore-list');
+        const totalDisplay = document.getElementById('total');
+
+        // Add chore when form submitted
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const name = document.getElementById('chore-name').value;
+            const amount = document.getElementById('chore-amount').value;
+
+            const choresRef = ref(database, 'chores');
+            push(choresRef, {
+                name: name,
+                amount: parseFloat(amount),
+                timestamp: Date.now(),
+                date: new Date().toLocaleDateString()
+            });
+
+            form.reset();
+        });
+
+        // Listen for chores and display them
+        const choresRef = ref(database, 'chores');
+        onValue(choresRef, (snapshot) => {
+            choreList.innerHTML = '';
+            let total = 0;
+
+            snapshot.forEach((childSnapshot) => {
+                const chore = childSnapshot.val();
+                const choreKey = childSnapshot.key;
+                total += chore.amount;
+
+                // Create entry for each chore
+                const choreDiv = document.createElement('div');
+                choreDiv.innerHTML = `
+                    <p>
+                        <strong>${chore.name}</strong> - 
+                        $${chore.amount.toFixed(2)} - 
+                        ${chore.date}
+                        <button onclick="deleteChore('${choreKey}')" class="shine small">Delete</button>
+                    </p>
+                `;
+                choreList.appendChild(choreDiv);
+            });
+
+            totalDisplay.textContent = total.toFixed(2);
+        });
+
+        // Delete function
+        window.deleteChore = function (choreKey) {
+            const choreRef = ref(database, 'chores/' + choreKey);
+            remove(choreRef);
+        };
+    </script>
 </body>
 
 </html>

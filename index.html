@@ -4,38 +4,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Money Tracker</title>
+    <title>Chore Tracker - Premium Edition</title>
     <link rel="stylesheet" href="style.css">
+
 </head>
 
 <body>
+    <div class="container">
+        <div class="header">
+            <h1>Chore Tracker</h1>
+            <p>Track your chores and earnings</p>
+        </div>
 
-    <h1>Money Tracker</h1>
+        <div class="input-card">
+            <form id="chore-form">
+                <div class="input-row">
+                    <div class="input-group">
+                        <label for="chore-input">Chore Description</label>
+                        <input type="text" id="chore-input" placeholder="Enter chore name..." required />
+                    </div>
 
-    <h2>Add Chore</h2>
-    <form id="chore-form">
-        <label>Chore Name:</label>
-        <input type="text" id="chore-name" required>
-        <br><br>
+                    <div class="input-group">
+                        <label for="price-input">Payment</label>
+                        <input type="number" id="price-input" placeholder="$0.00" step="0.01" required />
+                    </div>
+                </div>
 
-        <label>Amount:</label>
-        <input type="number" id="chore-amount" step="0.01" required>
-        <br><br>
+                <button type="submit" class="btn-add shine">Add Chore</button>
+            </form>
+        </div>
 
-        <button type="submit" class="shine">Add Chore</button>
-    </form>
+        <div class="log-section">
+            <div class="log-header">
+                <h2>Activity Log</h2>
+                <div class="total-badge">Total: $<span id="total">0.00</span></div>
+            </div>
 
-
-    <h2>Total Earned: $<span id="total">0.00</span></h2>
-
-
-    <h2>Chore Log</h2>
-    <div id="chore-list"></div>
+            <div class="chore-log" id="chore-log">
+                <div class="empty-state">
+                    <p>No chores logged yet</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script type="module">
         // Import from CDN
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js';
-        import { getDatabase, ref, push, set, onValue, remove } from 'https://www.gstatic.com/firebasejs/12.5.0/firebase-database.js';
+        import { getDatabase, ref, push, onValue, remove } from 'https://www.gstatic.com/firebasejs/12.5.0/firebase-database.js';
 
         // Your config
         const firebaseConfig = {
@@ -54,15 +70,15 @@
 
         // Get elements
         const form = document.getElementById('chore-form');
-        const choreList = document.getElementById('chore-list');
+        const choreLog = document.getElementById('chore-log');
         const totalDisplay = document.getElementById('total');
 
         // Add chore when form submitted
         form.addEventListener('submit', (e) => {
             e.preventDefault();
 
-            const name = document.getElementById('chore-name').value;
-            const amount = document.getElementById('chore-amount').value;
+            const name = document.getElementById('chore-input').value;
+            const amount = document.getElementById('price-input').value;
 
             const choresRef = ref(database, 'chores');
             push(choresRef, {
@@ -78,8 +94,19 @@
         // Listen for chores and display them
         const choresRef = ref(database, 'chores');
         onValue(choresRef, (snapshot) => {
-            choreList.innerHTML = '';
+            choreLog.innerHTML = '';
             let total = 0;
+            let index = 1;
+
+            if (!snapshot.exists()) {
+                choreLog.innerHTML = `
+                    <div class="empty-state">
+                        <p>No chores logged yet</p>
+                    </div>
+                `;
+                totalDisplay.textContent = '0.00';
+                return;
+            }
 
             snapshot.forEach((childSnapshot) => {
                 const chore = childSnapshot.val();
@@ -88,15 +115,19 @@
 
                 // Create entry for each chore
                 const choreDiv = document.createElement('div');
+                choreDiv.className = 'chore-item';
                 choreDiv.innerHTML = `
-                    <p>
-                        <strong>${chore.name}</strong> - 
-                        $${chore.amount.toFixed(2)} - 
-                        ${chore.date}
-                        <button onclick="deleteChore('${choreKey}')" class="shine small">Delete</button>
-                    </p>
+                    <div class="chore-info">
+                        <div class="chore-number">${index}</div>
+                        <div class="chore-name">${chore.name}</div>
+                    </div>
+                    <div class="chore-actions">
+                        <div class="chore-price">$${chore.amount.toFixed(2)}</div>
+                        <button class="btn-delete" onclick="deleteChore('${choreKey}')">Delete</button>
+                    </div>
                 `;
-                choreList.appendChild(choreDiv);
+                choreLog.appendChild(choreDiv);
+                index++;
             });
 
             totalDisplay.textContent = total.toFixed(2);
